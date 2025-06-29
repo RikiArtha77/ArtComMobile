@@ -93,9 +93,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (result['success']) {
+      await authService.fetchUserProfile();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profil berhasil diperbarui')),
       );
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -149,19 +151,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: _pickedImage != null
-                    ? FileImage(_pickedImage!)
-                    : (user?.profilePictureUrl != null &&
-                              user!.profilePictureUrl.isNotEmpty
-                          ? NetworkImage(user.profilePictureUrl)
-                          : const AssetImage('assets/default_avatar.png')
-                                as ImageProvider),
-                child:
-                    _pickedImage == null &&
-                        (user?.profilePictureUrl == null ||
-                            user!.profilePictureUrl.isEmpty)
-                    ? const Icon(Icons.camera_alt)
-                    : null,
+                backgroundColor: Colors.grey[300],
+                child: ClipOval(
+                  child: _pickedImage != null
+                      ? Image.file(
+                          _pickedImage!,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                      : (user?.profilePictureUrl != null &&
+                                user!.profilePictureUrl!.isNotEmpty
+                            ? Image.network(
+                                user.profilePictureUrl!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.camera_alt, size: 30),
+                              )
+                            : const Icon(Icons.camera_alt, size: 30)),
+                ),
               ),
             ),
             const SizedBox(height: 16),

@@ -5,7 +5,7 @@ class User {
   final String name;
   final String? email;
   final String? bio;
-  final String? profilePicture;
+  final String? profilePictureUrl;
   final bool isGoogleAuthEnabled;
 
   User({
@@ -13,7 +13,7 @@ class User {
     required this.name,
     required this.email,
     this.bio,
-    this.profilePicture,
+    this.profilePictureUrl,
     required this.isGoogleAuthEnabled,
   });
 
@@ -22,11 +22,9 @@ class User {
       id: json['id'],
       name: json['name'],
       email: json['email'],
-      bio: json['bio'],
-      profilePicture: json['profile_picture'],
+      bio: json['bio'] ?? '',
       isGoogleAuthEnabled: json['is_google_auth_enabled'] ?? false,
+      profilePictureUrl: json['profile_picture_url'] ?? '',
     );
   }
-  String get profilePictureUrl =>
-      profilePicture != null ? '$baseUrl/storage/$profilePicture' : '';
 }

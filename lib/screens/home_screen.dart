@@ -17,8 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<void> _refreshData() async {
-    setState(() {
-    });
+    setState(() {});
   }
 
   void _onAddArtwork(BuildContext context) {
@@ -30,9 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final user = authService.user;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -41,62 +37,68 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          GestureDetector(
-            onTap: () {
-              Navigator.push( 
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProfileScreen(
-                    name: user?.name ?? '',
-                    email: user?.email ?? '',
-                    bio: user?.bio ?? '',
-                    isGoogleAuthEnabled: user?.isGoogleAuthEnabled ?? false,
-                    userId: user?.id ?? 0,
+          Consumer<AuthService>(
+            builder: (context, auth, _) {
+              final user = auth.user;
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProfileScreen(
+                        name: user?.name ?? '',
+                        email: user?.email ?? '',
+                        bio: user?.bio ?? '',
+                        isGoogleAuthEnabled: user?.isGoogleAuthEnabled ?? false,
+                        userId: user?.id ?? 0,
+                      ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.grey[300],
+                    child: ClipOval(
+                      child: user != null && user.profilePictureUrl != null && user.profilePictureUrl!.isNotEmpty
+                          ? Image.network(
+                              user.profilePictureUrl!,
+                              width: 36,
+                              height: 36,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.person, size: 20),
+                            )
+                          : const Icon(Icons.person, size: 20),
+                    ),
                   ),
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundImage: (user != null && user.profilePicture != null)
-                    ? NetworkImage(user.profilePictureUrl)
-                    : const AssetImage('assets/default_avatar.png')
-                          as ImageProvider,
-              ),
-            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Featured Works",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                FeaturedSlider(),
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Explore More",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ArtworkGrid(),
-              ],
+      body: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "Featured Works",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
-        ),
+          FeaturedSlider(),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "Explore More",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ArtworkGrid(),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(

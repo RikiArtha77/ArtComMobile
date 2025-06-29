@@ -18,6 +18,19 @@ class AuthService with ChangeNotifier {
   User? get user => _user;
   bool get isAuthenticated => _isAuthenticated;
 
+  Future<void> fetchUserProfile() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/user'),
+      headers: {'Authorization': 'Bearer $_token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      _user = User.fromJson(data['user']);
+      notifyListeners();
+    }
+  }
+
   Future<void> _persistToken(String token, String userData) async {
     await _storage.write(key: 'auth_token', value: token);
     await _storage.write(key: 'user_data', value: userData);
@@ -168,7 +181,7 @@ class AuthService with ChangeNotifier {
     required String currentPassword,
     required String newPassword,
   }) async {
-    final url = Uri.parse('$baseUrl/api/profile/change-password');
+    final url = Uri.parse('$baseUrl/api/change-password');
 
     final response = await http.post(
       url,
@@ -200,7 +213,8 @@ class AuthService with ChangeNotifier {
     if (bio != null) request.fields['bio'] = bio;
 
     if (profilePicture != null) {
-      final mimeType = 'image/jpeg';
+      final mimeType =
+          'image/jpeg'; // atau gunakan package mime untuk deteksi otomatis
       request.files.add(
         await http.MultipartFile.fromPath(
           'profile_picture',
@@ -213,16 +227,19 @@ class AuthService with ChangeNotifier {
     try {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      final body = jsonDecode(response.body);
+
+      final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        _user = User.fromJson(body['user']);
+        print("RESPON UPDATE PROFILE: ${response.body}");
+        _user = User.fromJson(data['user']); // Update data user lokal
+        await fetchUserProfile(); // Refresh ke backend
         notifyListeners();
         return {'success': true};
       } else {
         return {
           'success': false,
-          'message': body['message'] ?? 'Gagal memperbarui profil',
+          'message': data['message'] ?? 'Gagal memperbarui profil',
         };
       }
     } catch (e) {

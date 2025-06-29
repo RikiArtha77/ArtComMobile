@@ -16,9 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthService()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => AuthService())],
       child: Consumer<AuthService>(
         builder: (ctx, auth, _) {
           return MaterialApp(
@@ -32,12 +30,12 @@ class MyApp extends StatelessWidget {
             routes: {
               '/home': (ctx) => const HomeScreen(),
               '/messages': (context) => const MessageListScreen(),
+              '/login': (context) => const LoginScreen(),
             },
             home: const AuthGate(),
             onUnknownRoute: (settings) => MaterialPageRoute(
-              builder: (ctx) => const Scaffold(
-                body: Center(child: Text('Page not found')),
-              ),
+              builder: (ctx) =>
+                  const Scaffold(body: Center(child: Text('Page not found'))),
             ),
           );
         },
@@ -61,7 +59,9 @@ class AuthGate extends StatelessWidget {
       future: auth.tryAutoLogin(),
       builder: (ctx, authResultSnapshot) {
         if (authResultSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         } else {
           return const LoginScreen();
         }
