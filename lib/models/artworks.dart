@@ -4,6 +4,7 @@ class Artwork {
   final String description;
   final String imageUrl;
   final String userName;
+  final String userProfileUrl;
   final String categoryName;
 
   Artwork({
@@ -12,6 +13,7 @@ class Artwork {
     required this.description,
     required this.imageUrl,
     required this.userName,
+    required this.userProfileUrl,
     required this.categoryName,
   });
 
@@ -22,6 +24,9 @@ class Artwork {
       description: json['description'],
       imageUrl: '$baseUrl${json['image_path']}',
       userName: json['user']?['name'] ?? 'Unknown',
+      userProfileUrl: json['user']?['profile_picture'] != null
+          ? '$baseUrl${json['user']['profile_picture']}'
+          : 'https://via.placeholder.com/150', // fallback jika tidak ada foto
       categoryName: json['category']?['name'] ?? 'Unknown',
     );
   }

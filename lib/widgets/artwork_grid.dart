@@ -43,11 +43,11 @@ class _ArtworkGridState extends State<ArtworkGrid> with AutomaticKeepAliveClient
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // ← Wajib jika pakai mixin AutomaticKeepAliveClientMixin
+    super.build(context);
 
     return RefreshIndicator(
       onRefresh: () async {
-        _pagingController.refresh(); // Trigger reload
+        _pagingController.refresh();
       },
       child: PagedGridView<int, Artwork>(
         pagingController: _pagingController,
@@ -57,11 +57,13 @@ class _ArtworkGridState extends State<ArtworkGrid> with AutomaticKeepAliveClient
           crossAxisCount: 2,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
-          childAspectRatio: 0.8,
+          childAspectRatio: 0.75,
         ),
         padding: const EdgeInsets.all(16.0),
         builderDelegate: PagedChildBuilderDelegate<Artwork>(
           itemBuilder: (context, item, index) => Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             clipBehavior: Clip.antiAlias,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,10 +72,8 @@ class _ArtworkGridState extends State<ArtworkGrid> with AutomaticKeepAliveClient
                   child: CachedNetworkImage(
                     imageUrl: item.imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) =>
-                        const Center(child: Icon(Icons.broken_image)),
+                    placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image)),
                   ),
                 ),
                 Padding(
@@ -84,15 +84,32 @@ class _ArtworkGridState extends State<ArtworkGrid> with AutomaticKeepAliveClient
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundImage: NetworkImage(item.userProfileUrl),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.userName,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
               ],
             ),
           ),
-          firstPageProgressIndicatorBuilder: (_) =>
-              const Center(child: CircularProgressIndicator()),
-          newPageProgressIndicatorBuilder: (_) =>
-              const Center(child: CircularProgressIndicator()),
-          noItemsFoundIndicatorBuilder: (_) =>
-              const Center(child: Text('No artworks found')),
+          firstPageProgressIndicatorBuilder: (_) => const Center(child: CircularProgressIndicator()),
+          newPageProgressIndicatorBuilder: (_) => const Center(child: CircularProgressIndicator()),
+          noItemsFoundIndicatorBuilder: (_) => const Center(child: Text('No artworks found')),
           newPageErrorIndicatorBuilder: (_) => Center(
             child: Column(
               children: [
@@ -118,7 +135,7 @@ class _ArtworkGridState extends State<ArtworkGrid> with AutomaticKeepAliveClient
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _pagingController.refresh(); // Refresh otomatis saat kembali ke halaman ini
+    _pagingController.refresh();
   }
 
   @override

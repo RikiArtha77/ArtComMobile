@@ -12,12 +12,9 @@ class FeaturedSlider extends StatefulWidget {
   State<FeaturedSlider> createState() => _FeaturedSliderState();
 }
 
-class _FeaturedSliderState extends State<FeaturedSlider>
-    with AutomaticKeepAliveClientMixin {
+class _FeaturedSliderState extends State<FeaturedSlider> with AutomaticKeepAliveClientMixin {
   static const _pageSize = 5;
-  final PagingController<int, Artwork> _pagingController = PagingController(
-    firstPageKey: 1,
-  );
+  final PagingController<int, Artwork> _pagingController = PagingController(firstPageKey: 1);
 
   @override
   void initState() {
@@ -27,10 +24,7 @@ class _FeaturedSliderState extends State<FeaturedSlider>
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final apiResponse = await ApiService.fetchArtworks(
-        pageKey,
-        pageSize: _pageSize,
-      );
+      final apiResponse = await ApiService.fetchArtworks(pageKey, pageSize: _pageSize);
 
       if (apiResponse['success'] == true) {
         final newItems = apiResponse['artworks'] as List<Artwork>;
@@ -51,16 +45,14 @@ class _FeaturedSliderState extends State<FeaturedSlider>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Penting untuk mixin
+    super.build(context);
 
     return SizedBox(
-      height: 220,
+      height: 240,
       child: RefreshIndicator(
         onRefresh: () async => _pagingController.refresh(),
         child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(
-            overscroll: false,
-          ), // supaya RefreshIndicator tidak nyangkut
+          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
           child: PagedListView<int, Artwork>(
             pagingController: _pagingController,
             scrollDirection: Axis.horizontal,
@@ -70,9 +62,11 @@ class _FeaturedSliderState extends State<FeaturedSlider>
                 width: 300,
                 margin: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
                         child: CachedNetworkImage(
@@ -81,20 +75,42 @@ class _FeaturedSliderState extends State<FeaturedSlider>
                           width: double.infinity,
                           placeholder: (context, url) =>
                               const Center(child: CircularProgressIndicator()),
-                          errorWidget: (context, url, error) => const Center(
-                            child: Icon(Icons.broken_image, size: 40),
-                          ),
+                          errorWidget: (context, url, error) =>
+                              const Center(child: Icon(Icons.broken_image, size: 40)),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                         child: Text(
                           item.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundImage: NetworkImage(item.userProfileUrl),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                item.userName,
+                                style: const TextStyle(fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                     ],
                   ),
                 ),
