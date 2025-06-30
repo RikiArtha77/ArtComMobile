@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../services/auth_service.dart';
 import 'add_artwork_screen.dart';
 import '../widgets/artwork_grid.dart';
 import '../widgets/featured_slider.dart';
 import 'chat_list_screen.dart';
-import 'profile_screen.dart';
 import '../services/user_service.dart';
 import '../models/user.dart';
+import '../models/post.dart';
 import 'user_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -89,6 +90,25 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((_) => _refreshData());
   }
 
+  Future<void> _openUserProfile(
+    User u,
+    bool isCurrentUser,
+    String token,
+  ) async {
+    final posts = await UserService(token).getUserPosts(u.id);
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          user: u,
+          userPosts: posts,
+          isCurrentUser: isCurrentUser,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context);
@@ -104,26 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {
-              _showSearchDialog(token);
-            },
+            onPressed: () => _showSearchDialog(token),
           ),
           if (user != null)
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProfileScreen(
-                      name: user.name,
-                      email: user.email ?? '',
-                      bio: user.bio ?? '',
-                      isGoogleAuthEnabled: user.isGoogleAuthEnabled,
-                      userId: user.id,
-                    ),
-                  ),
-                );
-              },
+              onTap: () => _openUserProfile(user, true, token),
               child: Padding(
                 padding: const EdgeInsets.only(right: 16.0),
                 child: CircleAvatar(
@@ -138,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 36,
                             height: 36,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
+                            errorBuilder: (_, __, ___) =>
                                 const Icon(Icons.person, size: 20),
                           )
                         : const Icon(Icons.person, size: 20),
@@ -166,14 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   title: Text(u.name),
                   subtitle: Text(u.bio ?? '-'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => UserProfileScreen(user: u),
-                      ),
-                    );
-                  },
+                  onTap: () => _openUserProfile(u, user?.id == u.id, token),
                 );
               },
             )
