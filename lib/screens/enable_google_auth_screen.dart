@@ -27,7 +27,7 @@ class _EnableGoogleAuthScreenState extends State<EnableGoogleAuthScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          'http://192.168.1.9:8000/api/google-auth-setup/${widget.userId}',
+          'http://192.168.1.14:8000/api/google-auth-setup/${widget.userId}',
         ),
         headers: {'Accept': 'application/json'},
       );
@@ -53,7 +53,7 @@ class _EnableGoogleAuthScreenState extends State<EnableGoogleAuthScreen> {
     setState(() => _isVerifying = true);
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.9:8000/api/verify-totp'),
+        Uri.parse('http://192.168.1.14:8000/api/verify-totp'),
         headers: {'Accept': 'application/json'},
         body: {
           'user_id': widget.userId.toString(),

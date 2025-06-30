@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import './services/auth_service.dart';
 import './screens/home_screen.dart';
 import './screens/login_screen.dart';
-import './screens/message_list_screen.dart';
+import './screens/chat_list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => AuthService())],
       child: Consumer<AuthService>(
-        builder: (ctx, auth, _) {
+        builder: (context, auth, _) {
           return MaterialApp(
             title: 'Art Gallery',
             theme: ThemeData(
@@ -27,14 +27,16 @@ class MyApp extends StatelessWidget {
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
             debugShowCheckedModeBanner: false,
+            initialRoute: '/',
             routes: {
-              '/home': (ctx) => const HomeScreen(),
-              '/messages': (context) => const MessageListScreen(),
+              '/': (context) => const AuthGate(),
+              '/home': (context) => const HomeScreen(),
               '/login': (context) => const LoginScreen(),
+              '/messages': (context) =>
+                  const ChatListScreen(), // ✅ tidak perlu parameter
             },
-            home: const AuthGate(),
             onUnknownRoute: (settings) => MaterialPageRoute(
-              builder: (ctx) =>
+              builder: (context) =>
                   const Scaffold(body: Center(child: Text('Page not found'))),
             ),
           );
@@ -57,14 +59,14 @@ class AuthGate extends StatelessWidget {
 
     return FutureBuilder(
       future: auth.tryAutoLogin(),
-      builder: (ctx, authResultSnapshot) {
-        if (authResultSnapshot.connectionState == ConnectionState.waiting) {
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
-        } else {
-          return const LoginScreen();
         }
+
+        return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
       },
     );
   }
